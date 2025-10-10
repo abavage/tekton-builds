@@ -95,6 +95,27 @@ spec:
             value: false
           - name: DOCKERFILE
             value: ./containerfile
+
+      - name: deploy
+        params:
+        - name: SCRIPT
+          value: oc create deploy build-deploy-$(date "+%Y%m%d%H%M%S") --image="$(params.image)" -n image-builds
+        runAfter:
+        - build-image
+        taskRef:
+          params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client
+          - name: namespace
+            value: openshift-pipelines
+          resolver: cluster
+
+
+
+
+
   workspaces:
     - name: source
       volumeClaimTemplate:
