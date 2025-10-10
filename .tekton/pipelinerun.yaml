@@ -81,6 +81,11 @@ spec:
               value: openshift-pipelines
         runAfter:
           - fetch-repository
+        workspaces:
+          - name: source
+            workspace: source
+          - name: basic-auth
+            workspace: basic-auth
         params:
           - name: IMAGE
             value: "$(params.image)"
