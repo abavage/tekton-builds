@@ -111,8 +111,8 @@ spec:
                 echo "failing"
                 exit 1
               else
-                echo "good"
-                exit 0
+                echo "good - force error"
+                exit 1
             fi
         runAfter:
         - build-image
