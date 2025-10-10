@@ -104,6 +104,16 @@ spec:
             oc create svc clusterip build-deploy --tcp=8080:8080 -n image-builds
             oc create route edge build-deploy --service=build-deploy --insecure-policy=Redirect -n image-builds
             #oc create deploy build-deploy-$(date "+%Y%m%d%H%M%S") --image="$(params.image)" -n image-builds
+            curl https://$(oc get route  build-deploy -o jsonpath='{.spec.host}' -n image-builds)
+
+            if [ $? -ne 0 ]
+              then
+                echo "failing"
+                exit 1
+              else
+                echo "good"
+                exit 0
+            fi
         runAfter:
         - build-image
         taskRef:
