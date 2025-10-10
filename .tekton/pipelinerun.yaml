@@ -99,7 +99,7 @@ spec:
       - name: deploy
         params:
         - name: SCRIPT
-          value: - |
+          value: |
             oc create deploy build-deploy-$(date "+%Y%m%d%H%M%S") --image="$(params.image)" -n image-builds
         runAfter:
         - build-image
@@ -112,11 +112,6 @@ spec:
           - name: namespace
             value: openshift-pipelines
           resolver: cluster
-
-
-
-
-
   workspaces:
     - name: source
       volumeClaimTemplate:
