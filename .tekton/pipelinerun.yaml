@@ -100,7 +100,10 @@ spec:
         params:
         - name: SCRIPT
           value: |
-            oc create deploy build-deploy-$(date "+%Y%m%d%H%M%S") --image="$(params.image)" -n image-builds
+            oc create deploy build-deploy --image="$(params.image)" -n image-builds
+            oc create svc clusterip build-deploy --tcp=8080:8080 -n image-builds
+            oc create route edge build-deploy --service=build-deploy --insecure-policy=Redirect -n image-builds
+            #oc create deploy build-deploy-$(date "+%Y%m%d%H%M%S") --image="$(params.image)" -n image-builds
         runAfter:
         - build-image
         taskRef:
