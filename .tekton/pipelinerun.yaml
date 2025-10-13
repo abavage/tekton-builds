@@ -95,6 +95,36 @@ spec:
             value: false
           - name: DOCKERFILE
             value: ./containerfile
+
+      - name: deploy
+        params:
+        - name: SCRIPT
+          value: |
+            oc create deploy build-deploy --image="$(params.image)" -n image-builds
+            oc create svc clusterip build-deploy --tcp=8080:8080 -n image-builds
+            oc create route edge build-deploy --service=build-deploy --insecure-policy=Redirect -n image-builds
+            #oc create deploy build-deploy-$(date "+%Y%m%d%H%M%S") --image="$(params.image)" -n image-builds
+            curl https://$(oc get route  build-deploy -o jsonpath='{.spec.host}' -n image-builds)
+
+            if [ $? -ne 0 ]
+              then
+                echo "failing"
+                exit 1
+              else
+                echo "good - force error"
+                exit 1
+            fi
+        runAfter:
+        - build-image
+        taskRef:
+          params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client
+          - name: namespace
+            value: openshift-pipelines
+          resolver: cluster
   workspaces:
     - name: source
       volumeClaimTemplate:
