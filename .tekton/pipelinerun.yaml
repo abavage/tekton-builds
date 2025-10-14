@@ -96,7 +96,7 @@ spec:
           - name: DOCKERFILE
             value: ./containerfile
 
-      - name: deploy
+      - name: test-image
         params:
         - name: SCRIPT
           value: |
