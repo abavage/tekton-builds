@@ -103,24 +103,24 @@ spec:
             #!/bin/bash
 
             Create_resources () {
-            oc create deploy build-deploy --image="$(params.image)" --replicas=0 -n image-builds
-            oc set resources deployment build-deploy --limits=cpu=200m,memory=256Mi --requests=cpu=100m,memory=125Mi -n image-builds
+              oc create deploy build-deploy --image="$(params.image)" --replicas=0 -n image-builds
+              oc set resources deployment build-deploy --limits=cpu=200m,memory=256Mi --requests=cpu=100m,memory=125Mi -n image-builds
 
-            oc patch deployment build-deploy --type=merge -p '{"spec": {"template": {"spec": {"containers": [{"name": "build-deploy", "image": "$(params.image)", "livenessProbe": {"tcpSocket": {"port": 8080}, "initialDelaySeconds": 15, "periodSeconds": 10, "timeoutSeconds": 2, "failureThreshold": 3}, "readinessProbe": {"tcpSocket": {"port": 8080}, "initialDelaySeconds": 15, "periodSeconds": 10, "timeoutSeconds": 2, "failureThreshold": 3}}]}}}}' -n image-builds
+              oc patch deployment build-deploy --type=merge -p '{"spec": {"template": {"spec": {"containers": [{"name": "build-deploy", "image": "$(params.image)", "livenessProbe": {"tcpSocket": {"port": 8080}, "initialDelaySeconds": 15, "periodSeconds": 10, "timeoutSeconds": 2, "failureThreshold": 3}, "readinessProbe": {"tcpSocket": {"port": 8080}, "initialDelaySeconds": 15, "periodSeconds": 10, "timeoutSeconds": 2, "failureThreshold": 3}}]}}}}' -n image-builds
 
-            oc create cm index --from-file=index.html -n image-builds
-            oc set volume deploy/build-deploy --add --configmap-name=index --mount-path=/var/www/html/ --name=index -n image-builds
+              oc create cm index --from-file=index.html -n image-builds
+              oc set volume deploy/build-deploy --add --configmap-name=index --mount-path=/var/www/html/ --name=index -n image-builds
 
-            oc create svc clusterip build-deploy --tcp=8080:8080 -n image-builds
-            oc create route edge build-deploy --service=build-deploy --insecure-policy=Redirect -n image-builds
-            oc scale deploy build-deploy --replicas=1 -n image-builds
+              oc create svc clusterip build-deploy --tcp=8080:8080 -n image-builds
+              oc create route edge build-deploy --service=build-deploy --insecure-policy=Redirect -n image-builds
+              oc scale deploy build-deploy --replicas=1 -n image-builds
             }
 
             Clean_up () {
-             echo oc delete deploy build-deploy -n image-builds
-             echo oc delete cm index -n image-builds
-             echo oc delete svc build-deploy -n image-builds
-             echo oc delete route build-deploy -n image-builds
+              oc delete deploy build-deploy -n image-builds
+              oc delete cm index -n image-builds
+              oc delete svc build-deploy -n image-builds
+              oc delete route build-deploy -n image-builds
             }
 
             echo 'Creating resources to test the new image -- "$(params.image)" '
