@@ -152,7 +152,7 @@ spec:
         runAfter:
         - build-image
         workspaces:
-          - name: thesource
+          - name: source
             workspace: source
         taskRef:
           params:
