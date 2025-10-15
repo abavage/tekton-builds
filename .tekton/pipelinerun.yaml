@@ -127,7 +127,7 @@ spec:
             Create_resources
 
 
-            MAX_RETRIES=10
+            MAX_RETRIES=30
             SLEEP_BETWEEN_RETRIES=2
             ROUTE=$(oc get route build-deploy -o jsonpath='{.spec.host}' | tr -d '[:space:]')
 
