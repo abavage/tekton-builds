@@ -96,6 +96,33 @@ spec:
           - name: DOCKERFILE
             value: ./containerfile
 
+      - name: cleanup-failed-resources
+        params:
+        - name: SCRIPT
+          value: |
+            #!/bin/bash
+
+            Clean_up () {
+              oc delete deploy build-deploy -n image-builds || true
+              oc delete cm index -n image-builds || true
+              oc delete svc build-deploy -n image-builds || true
+              oc delete route build-deploy -n image-builds || true
+            }
+            echo "Cleaning up any failed resources"
+            Clean_up
+        runAfter:
+        - build-image
+        taskRef:
+          params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client
+          - name: namespace
+            value: openshift-pipelines
+          resolver: cluster
+
+
       - name: test-image
         params:
         - name: SCRIPT
@@ -150,7 +177,7 @@ spec:
             echo "Failed to receive HTTP 200 from ${ROUTE} after $MAX_RETRIES attempts."
             exit 1
         runAfter:
-        - build-image
+        - cleanup-failed-resources
         workspaces:
           - name: manifest_dir
             workspace: source
