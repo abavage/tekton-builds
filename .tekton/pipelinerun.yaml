@@ -96,6 +96,33 @@ spec:
           - name: DOCKERFILE
             value: ./containerfile
 
+      - name: cleanup-failed-resources
+        params:
+        - name: SCRIPT
+          value: |
+            #!/bin/bash
+
+            Clean_up () {
+              oc delete deploy build-deploy -n image-builds || true
+              oc delete cm index -n image-builds || true
+              oc delete svc build-deploy -n image-builds || true
+              oc delete route build-deploy -n image-builds || true
+            }
+            echo "Cleaning up any failed resources"
+            Clean_up
+        runAfter:
+        - build-image
+        taskRef:
+          params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client
+          - name: namespace
+            value: openshift-pipelines
+          resolver: cluster
+
+
       - name: test-image
         params:
         - name: SCRIPT
@@ -127,8 +154,8 @@ spec:
             Create_resources
 
 
-            MAX_RETRIES=10
-            SLEEP_BETWEEN_RETRIES=2
+            MAX_RETRIES=60
+            SLEEP_BETWEEN_RETRIES=1
             ROUTE=$(oc get route build-deploy -o jsonpath='{.spec.host}' | tr -d '[:space:]')
 
             attempt=1
@@ -137,7 +164,8 @@ spec:
 
               if [[ "$CURL" == "200" ]]; then
                 echo "HTTP 200 received from ${ROUTE}"
-
+                echo ""
+                echo "Removing the objects used for testing the image."
                 Clean_up
                 exit 0
               else
@@ -150,9 +178,9 @@ spec:
             echo "Failed to receive HTTP 200 from ${ROUTE} after $MAX_RETRIES attempts."
             exit 1
         runAfter:
-        - build-image
+        - cleanup-failed-resources
         workspaces:
-          - name: source
+          - name: manifest_dir
             workspace: source
         taskRef:
           params:
