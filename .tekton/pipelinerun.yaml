@@ -164,7 +164,8 @@ spec:
 
               if [[ "$CURL" == "200" ]]; then
                 echo "HTTP 200 received from ${ROUTE}"
-
+                echo ""
+                echo "Removing the objects used for testing the image."
                 Clean_up
                 exit 0
               else
