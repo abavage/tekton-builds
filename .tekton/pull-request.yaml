@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  name: image-build
+  name: pull-request
   annotations:
     # The event we are targeting as seen from the webhook payload
     # this can be an array too, i.e: [pull_request, push]
@@ -79,8 +79,6 @@ spec:
               value: buildah-1-20-0
             - name: namespace
               value: openshift-pipelines
-        runAfter:
-          - fetch-repository
         workspaces:
           - name: source
             workspace: source
@@ -95,8 +93,21 @@ spec:
             value: false
           - name: DOCKERFILE
             value: ./containerfile
+        runAfter:
+          - fetch-repository
 
       - name: cleanup-failed-resources
+        taskRef:
+          params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client
+          - name: namespace
+            value: openshift-pipelines
+          resolver: cluster
+        runAfter:
+        - build-image
         params:
         - name: SCRIPT
           value: |
@@ -112,6 +123,9 @@ spec:
             Clean_up
         runAfter:
         - build-image
+
+
+      - name: test-image
         taskRef:
           params:
           - name: kind
@@ -121,9 +135,9 @@ spec:
           - name: namespace
             value: openshift-pipelines
           resolver: cluster
-
-
-      - name: test-image
+        workspaces:
+          - name: manifest_dir
+            workspace: source
         params:
         - name: SCRIPT
           value: |
@@ -179,18 +193,6 @@ spec:
             exit 1
         runAfter:
         - cleanup-failed-resources
-        workspaces:
-          - name: manifest_dir
-            workspace: source
-        taskRef:
-          params:
-          - name: kind
-            value: task
-          - name: name
-            value: openshift-client
-          - name: namespace
-            value: openshift-pipelines
-          resolver: cluster
   workspaces:
     - name: source
       volumeClaimTemplate:
