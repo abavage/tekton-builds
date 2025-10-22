@@ -224,6 +224,25 @@ spec:
         runAfter:
         - test-image
 
+      - name: tag-image
+        taskSpec:
+          steps:
+            - name: tag-image
+              image: "$(params.base_image)"
+              script: |
+                #!/bin/bash
+
+                RELEASE=$(params.revision)
+                
+                echo "Tag image $(params.image) YYYYMMDDHHSS"
+                oc tag test:$RELEASE test:$(date "+%Y%m%d%H%M%S") -n image-builds
+    
+        workspaces:
+          - name: source
+            workspace: source
+        runAfter:
+        - test-image
+
   workspaces:
     - name: source
       volumeClaimTemplate:
