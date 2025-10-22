@@ -216,9 +216,9 @@ spec:
                 RELEASE=$(params.revision)
                 BUCKET=$(params.bucket)
     
-                echo $RELEASE
-                
-                ls -al /workspace/source
+                echo $RELEASE > /workspace/source/image-build-git-sha.txt
+                aws s3 cp /workspace/source/image-build-git-sha.txt s3://$BUCKET/image-build-git-sha.txt
+                aws s3 ls s3://$BUCKET/
 
         workspaces:
           - name: source
