@@ -199,14 +199,7 @@ spec:
         - cleanup-failed-resources
 
       - name: copy-git-sha-to-s3
-        #params:
-        #  - name: namespace
-        #    value: image-builds
         taskSpec:
-          #params:
-          #  - name: namespace
-          #    type: string
-          #    description: "Namespace where the imagestream will reside"
           steps:
             - name: copy-git-sha-to-s3
               image: "$(params.base_image)"
@@ -217,9 +210,14 @@ spec:
                 BUCKET=$(params.bucket)
     
                 echo $RELEASE > /workspace/source/image-build-git-sha.txt
-                aws s3 cp /workspace/source/image-build-git-sha.txt s3://$BUCKET/image-build-git-sha.txt
-                aws s3 ls s3://$BUCKET/
 
+                aws s3 cp /workspace/source/image-build-git-sha.txt s3://$BUCKET/image-build-git-sha.txt
+                if [[ "$?" != "0" ]];then
+                  echo "file upload to s3://$BUCKET failed"
+                  exit 1
+                fi
+
+                aws s3 ls s3://$BUCKET/
         workspaces:
           - name: source
             workspace: source
