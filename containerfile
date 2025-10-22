@@ -1,8 +1,12 @@
 #FROM registry.access.redhat.com/ubi9/httpd-24:latest
 FROM registry.redhat.io/rhel9/httpd-24:latest
 COPY index.html /var/www/html/index.html
+
+USER 0
+
 RUN dnf update -y && \
     dnf clean all -y
 EXPOSE 8080
-#USER 1001
+USER 1001
+
 CMD ["/usr/bin/run-httpd"]
