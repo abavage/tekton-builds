@@ -215,7 +215,9 @@ spec:
 
                 RELEASE=$(params.revision)
                 BUCKET=$(params.bucket)
-     
+    
+                echo $RELEASE
+                
                 ls -al /workspace/source
 
         workspaces:
