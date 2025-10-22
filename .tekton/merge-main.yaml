@@ -35,8 +35,10 @@ spec:
       value: "{{ repo_url }}"
     - name: revision
       value: "{{ revision }}"
-    #- name: image
-    #  value: "image-registry.openshift-image-registry.svc:5000/image-builds/test:{{ revision }}"
+    - name: base_image
+      value: "quay.io/abavage/base-image/base-image:latest"
+    - name: bucket
+      value: "one-openshift-pipeline-image-builds"
   pipelineSpec:
     params:
       - name: repo_url
@@ -48,28 +50,25 @@ spec:
       - name: basic-auth
     
     tasks:
-      - name: fetch-repository
-        taskRef:
-          resolver: cluster
-          params:
-            - name: kind
-              value: task
-            - name: name
-              value: git-clone-1-20-0
-            - name: namespace
-              value: openshift-pipelines
+      - name: 
+        taskSpec:
+          steps:
+            - name: copy-git-sha-from-s3
+              image: "$(params.base_image)"
+              script: |
+                #!/bin/bash
+
+                RELEASE=$(params.revision)
+                BUCKET=$(params.bucket)
+
+                aws s3 cp s3://$BUCKET/image-build-git-sha.txt /workspace/source/image-build-git-sha.txt
+
+                cat /workspace/source/image-build-git-sha.txt
         workspaces:
-          - name: output
+          - name: source
             workspace: source
-          - name: basic-auth
-            workspace: basic-auth
-        params:
-          - name: URL
-            value: $(params.repo_url)
-          - name: REVISION
-            value: $(params.revision)
-          - name: DELETE_EXISTING
-            value: "true"
+        #runAfter:
+        #- test-image
       
   workspaces:
     - name: source
