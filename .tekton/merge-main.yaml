@@ -50,7 +50,7 @@ spec:
       - name: basic-auth
     
     tasks:
-      - name: 
+      - name: copy-git-sha-from-s3
         taskSpec:
           steps:
             - name: copy-git-sha-from-s3
