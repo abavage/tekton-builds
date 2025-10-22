@@ -35,6 +35,10 @@ spec:
       value: "{{ revision }}"
     - name: image
       value: "image-registry.openshift-image-registry.svc:5000/image-builds/test:{{ revision }}"
+    - name: base_image
+      value: "quay.io/abavage/base-image/base-image:latest"
+    - name: bucket
+      value: "one-openshift-pipeline-image-builds"
   pipelineSpec:
     params:
       - name: repo_url
@@ -193,6 +197,33 @@ spec:
             exit 1
         runAfter:
         - cleanup-failed-resources
+
+      - name: copy-git-sha-to-s3
+        #params:
+        #  - name: namespace
+        #    value: image-builds
+        taskSpec:
+          #params:
+          #  - name: namespace
+          #    type: string
+          #    description: "Namespace where the imagestream will reside"
+          steps:
+            - name: copy-git-sha-to-s3
+              image: "$(params.base_image)"
+              script: |
+                #!/bin/bash
+
+                RELEASE=$(params.revision)
+                BUCKET=$(params.bucket)
+     
+                ls -al /workspace/source
+
+        workspaces:
+          - name: source
+            workspace: source
+        runAfter:
+        - test-image
+
   workspaces:
     - name: source
       volumeClaimTemplate:
