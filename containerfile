@@ -1,4 +1,5 @@
-FROM registry.access.redhat.com/ubi9/httpd-24:latest
+#FROM registry.access.redhat.com/ubi9/httpd-24:latest
+FROM registry.redhat.io/rhel9/httpd-24:latest
 COPY index.html /var/www/html/index.html
 RUN dnf update -y && \
     dnf clean all -y
